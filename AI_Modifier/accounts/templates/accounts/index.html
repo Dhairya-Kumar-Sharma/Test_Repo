@@ -1,0 +1,40 @@
+{% extends "accounts/layout.html" %}
+
+{% block content %}
+
+    <div>
+        <h1 class="title-text">AI Modifier</h1>
+        {% if message %}
+            <br>
+            <strong><p>{{message}}</p></strong>
+        {% endif %}
+
+        {% if user.name %}
+            <button type="submit" class="logout-btn"><a href="{% url 'logout' %}">Log out</a></button>
+
+            <strong><p>Hello {{user.name}}</p></strong>
+            <button type="submit" class="add-request-btn" ><a href="{% url 'add_request' %}">Add Request</a></button>
+
+            {% if urls %}
+            <form class="client_req_form" action="{% url 'change_request' %}" method = "POST">
+                {% csrf_token %}
+                <select id="client_req_urls" name="client_req_urls" class="code-links-dropdown">
+                    <option value="" selected>Please select a link</option>
+                    {% for url in urls %}
+                        <option value="{{ url }}">{{ url }}</option>
+                    {% endfor %}
+                </select>  
+                <button type="submit" class="add-request-btn" name="make_changes" value="make_changes" >Make Changes</button>              
+                <button type="submit" class="add-request-btn" name="edit_request" value="edit_request" >Edit Request</button>              
+            </form>
+            {% endif %}
+                        
+        {% else %}
+            <br>
+            <button type="submit" class="login-btn" ><a href="{% url 'login' %}"> Log in </a></button>
+        
+        {% endif %}
+        
+    </div>
+
+{% endblock %}
