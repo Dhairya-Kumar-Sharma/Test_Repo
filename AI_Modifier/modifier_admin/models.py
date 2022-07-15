@@ -30,6 +30,10 @@ class Profile(AbstractUser):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        verbose_name = "Client"
+        verbose_name_plural = "Clients"
 
 @receiver(pre_save, sender=settings.AUTH_USER_MODEL)
 def add_password(sender, instance, *args, **kwargs):

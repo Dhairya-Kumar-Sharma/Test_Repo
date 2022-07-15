@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+admin.site.site_header = "AI Modifier Admin"
+admin.site.site_title = "AI Modifier Portal"
+admin.site.index_title = "Welcome to AI Modifier Portal"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
+    path('', include('accounts.urls')),
 ]

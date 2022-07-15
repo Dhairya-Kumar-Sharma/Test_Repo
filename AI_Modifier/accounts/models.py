@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.db import models
 from modifier_admin.models import Profile
 
@@ -10,3 +11,24 @@ class ClientRequest(models.Model):
     version_control = models.CharField(max_length=50, verbose_name='Version Control')
     branch = models.CharField(max_length=50, null=True, blank=True, verbose_name='Branch')
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='client_request')
+    
+    def __str__(self):
+        return self.url
+    
+    class Meta:
+        verbose_name = "Request"
+        verbose_name_plural = "Requests"
+    
+    
+class ChangeRequest(models.Model):
+    client_request = models.ForeignKey(ClientRequest, on_delete=models.CASCADE, related_name='change_request', verbose_name='Client')
+    repo = models.CharField(max_length=150, verbose_name='Repository')
+    success = models.BooleanField(default=False, verbose_name='Pushed')
+    error = models.TextField(default='', verbose_name='Message')
+    
+    def __str__(self):
+        return self.repo
+    
+    class Meta:
+        verbose_name = "Change Request"
+        verbose_name_plural = "Change Requests"

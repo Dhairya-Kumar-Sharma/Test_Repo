@@ -2,134 +2,134 @@
 
 {% block content %}
 
-{% if user.is_authenticated %}
-<section class="header">
-  <div class="header_btn">
-    <strong><p>User: {{user.name}}</p></strong>
-    <div class="btnn">
+  {% if user.is_authenticated %}
+    <section class="header">
+<div class="header_btn">
+      <strong><p>User: {{user.name}}</p></strong>
+      <div class="btnn">
       <button type="submit" class="logout-btn"><a href="{% url 'logout' %}">Log out</a></button>
       <button type="submit" class="logout-btn"><a href="{% url 'index' %}">Cancel</a></button>
     </div>
   </div>
-  <div>
-    <form class="text-manage" action="" method="post">
-      {% csrf_token %}
+      <div>
+        <form class="text-manage" action="" method="post">
+          {% csrf_token %}
 
-      {% if client_req_urls %}
-      <input type="hidden" name="client_req_urls" id="client_req_urls" value={{client_req_urls}} required>
+          {% if client_req_urls %}
+          <input type="hidden" name="client_req_urls" id="client_req_urls" value={{client_req_urls}} required>
+          {% endif %}
+
+          <div class="msg">{{ msg }}</div>
+          <label>Repo path:</label>
+          <div name="Repo_Path" class="input-field1">
+            {% if repo %}
+            <span class="dropdown" value={{repo}}>{{repo}}</span>
+            {% else %}
+            <span class="dropdown" value="no_repo">No repo found</span>
+            {% endif %}
+          </div>
+          <br></br>
+          <label>Branch name:</label>
+          <div name="Branch_Name" class="input-field1">
+            <!--option selected disabled hidden>none</option-->
+            {% if branch %}
+            <span class="dropdown" value={{branch}}>{{branch}}</span>
+            {% else %}
+            <span class="dropdown" value="no_branch">No branch found</span>
+            {% endif %}
+          </div>
+          <br></br>
+          <label>Page name:</label>
+          <select name="Page_Name" class="input-field1">
+            <option class="dropdown" selected disabled hidden>Select an option</option>
+            {% for x in Html_List %}
+            <option class="dropdown" value="{{x}}">{{x}}</option>
+            {% endfor %}
+          </select>
+          <!--input name="Text_To_Replace" type="text" class="input-field" placeholder="Enter text to find and replace"-->
+          <div class="button-wapper">
+            <button type="submit"class="hero-btn">Find</button>
+          <button id="save" name="save" type="submit" class="hero-btn mx-3" value="{{save_btn}}" formnovalidate disabled>
+            {% if save_btn == "save" %}
+            Save
+            {% else %}
+            Undo
+            {% endif %}
+          </button>
+          <button id="push" name="push" type="submit" class="hero-btn" formnovalidate disabled>Push</button>
+          </div>
+          
+        </form>
+      </div>
+      {% if Table_Length != 0 %}
+      <div class="table-responsive">
+        <h2 class="text-center">Replace place</h2>
+        <table class="table table-success table-striped table-hover">
+          <caption>List of found text</caption>
+          <thead>
+            <tr>
+              <th scope="col">S/N</th>
+              <th scope="col">Tag</th>
+              <th scope="col">Text</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in Table %}
+              <tr>
+                <td></td>
+                <td>{{x.0}}</td>
+                <td>{{x.1}}</td>
+                <!--td>
+                  <form method="post" action="">
+                    <input name="Where_To_Change" type="hidden" value="{{x}}">
+                    <input name="Replace_Text_With" type="text" class="input-field" style="color:black;" placeholder="Enter what the text has to be replaced with">
+                    <button type="submit" class="btn btn-primary btn-sm my-2">Change This</button>
+                  </form>
+                </td-->
+                <td>
+                  <form method="post" action="">
+                    {% csrf_token %}
+                    {% if client_req_urls %}
+                    <input type="hidden" name="client_req_urls" id="client_req_urls" value={{client_req_urls}} required>
+                    {% endif %}
+                    <input name="Where_To_Change" type="hidden" value="{{x.2}}">
+                    <input name="Text_To_Replace" style="color:black;" type="text" class="input-field" placeholder="Replace What?">
+                    <input name="Replace_Text_With" style="color:black;" type="text" class="input-field" placeholder="Replace With?">
+                    <label>Font Size: </label><input name="Replace_Font_With" value="{{x.3}}" type="number" min="1" style="color:black;" class="input-field2"></input>
+                    <label>Font Color: </label><input name="Replace_Color_With" id="{{x.2}}" value="{{x.4}}" type="color" class="input-field3 mx-2"></input>
+                    <button type="submit" class="btn btn-primary btn-sm">Change This</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <h2 class="text-center">No Text Found</h2>
       {% endif %}
-
-      <div class="msg">{{ msg }}</div>
-      <label>Repo path:</label>
-      <div name="Repo_Path" class="input-field1">
-        {% if repo %}
-        <span class="dropdown" value={{repo}}>{{repo}}</span>
-        {% else %}
-        <span class="dropdown" value="no_repo">No repo found</span>
-        {% endif %}
-      </div>
-      <br></br>
-      <label>Branch name:</label>
-      <div name="Branch_Name" class="input-field1">
-        <!--option selected disabled hidden>none</option-->
-        {% if branch %}
-        <span class="dropdown" value={{branch}}>{{branch}}</span>
-        {% else %}
-        <span class="dropdown" value="no_branch">No branch found</span>
-        {% endif %}
-      </div>
-      <br></br>
-      <label>Page name:</label>
-      <select name="Page_Name" class="input-field1">
-        <option class="dropdown" selected disabled hidden>Select an option</option>
-        {% for x in Html_List %}
-        <option class="dropdown" value="{{x}}">{{x}}</option>
-        {% endfor %}
-      </select>
-      <!--input name="Text_To_Replace" type="text" class="input-field" placeholder="Enter text to find and replace"-->
-      <div class="button-wapper">
-        <button type="submit"class="hero-btn">Find</button>
-      <button id="save" name="save" type="submit" class="hero-btn mx-3" value="{{save_btn}}" formnovalidate disabled>
-        {% if save_btn == "save" %}
-        Save
-        {% else %}
-        Undo
-        {% endif %}
-      </button>
-      <button id="push" name="push" type="submit" class="hero-btn" formnovalidate disabled>Push</button>
-      </div>
-      
-    </form>
-  </div>
-  {% if Table_Length != 0 %}
-  <div class="table-responsive">
-    <h2 class="text-center">Replace place</h2>
-    <table class="table table-success table-striped table-hover">
-      <caption>List of found text</caption>
-      <thead>
-        <tr>
-          <th scope="col">S/N</th>
-          <th scope="col">Tag</th>
-          <th scope="col">Text</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for x in Table %}
-          <tr>
-            <td></td>
-            <td>{{x.0}}</td>
-            <td>{{x.1}}</td>
-            <!--td>
-              <form method="post" action="">
-                <input name="Where_To_Change" type="hidden" value="{{x}}">
-                <input name="Replace_Text_With" type="text" class="input-field" style="color:black;" placeholder="Enter what the text has to be replaced with">
-                <button type="submit" class="btn btn-primary btn-sm my-2">Change This</button>
-              </form>
-            </td-->
-            <td>
-              <form method="post" action="">
-                {% csrf_token %}
-                {% if client_req_urls %}
-                <input type="hidden" name="client_req_urls" id="client_req_urls" value={{client_req_urls}} required>
-                {% endif %}
-                <input name="Where_To_Change" type="hidden" value="{{x.2}}">
-                <input name="Text_To_Replace" style="color:black;" type="text" class="input-field" placeholder="Replace What?">
-                <input name="Replace_Text_With" style="color:black;" type="text" class="input-field" placeholder="Replace With?">
-                <label>Font Size: </label><input name="Replace_Font_With" value="{{x.3}}" type="number" min="1" style="color:black;" class="input-field2"></input>
-                <label>Font Color: </label><input name="Replace_Color_With" id="{{x.2}}" value="{{x.4}}" type="color" class="input-field3 mx-2"></input>
-                <button type="submit" class="btn btn-primary btn-sm">Change This</button>
-              </form>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    </section>
+    <script>
+      var SaveButton = document.getElementById('save');
+      var PushButton = document.getElementById('push');
+      {% if msg == "Success. Please save the changes" %}
+        SaveButton.disabled = false;
+      {% endif %}
+      {% if msg == "Success. Please push the changes" %}
+        SaveButton.disabled = false;
+        PushButton.disabled = false;
+      {% elif msg == "Changes successfully restored" %}
+        SaveButton.disabled = true;
+      {% endif %}
+      {% if msg == "Changes have been pushed successfully" or msg == "Error! Please try again later" %}
+        SaveButton.disabled = true;
+        PushButton.disabled = true;
+      {% endif %}
+    </script>
   {% else %}
-  <h2 class="text-center">No Text Found</h2>
+    <br>
+    <button type="submit" class="login-btn" ><a href="{% url 'login' %}"> Log in </a></button>
   {% endif %}
-</section>
-<script>
-  var SaveButton = document.getElementById('save');
-  var PushButton = document.getElementById('push');
-  {% if msg == "Success. Please save the changes" %}
-    SaveButton.disabled = false;
-  {% endif %}
-  {% if msg == "Success. Please push the changes" %}
-    SaveButton.disabled = false;
-    PushButton.disabled = false;
-  {% elif msg == "Changes successfully restored" %}
-    SaveButton.disabled = true;
-  {% endif %}
-  {% if msg == "Changes have been pushed successfully" or msg == "Error! Please try again later" %}
-    SaveButton.disabled = true;
-    PushButton.disabled = true;
-  {% endif %}
-</script>
-{% else %}
-<br>
-<button type="submit" class="login-btn" ><a href="{% url 'login' %}"> Log in </a></button>
-{% endif %}
 
 {% endblock %}

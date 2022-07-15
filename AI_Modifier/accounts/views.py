@@ -17,7 +17,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template import loader
 
-from accounts.models import ClientRequest
+from accounts.models import ClientRequest, ChangeRequest
 from modifier_admin.models import Profile
 
 
@@ -146,14 +146,17 @@ def change_request(request):
                 Response_Table = []
                 Response_Table_Length = len(Response_Table)
                 
+                Repo_Path = f"{code_link[:code_link.find('//')+2]}{username}:{token}@{code_link[code_link.find('//')+2:]}"
+                print(f'Repo: {Repo_Path}')
+                Branch_Name = branch
+                Repo_Name = "All_Repo/" + Repo_Path[Repo_Path.rfind('/')+1:].split('.')[0]
+                
                 # if 'Repo_Path' in request.POST and 'Branch_Name' in request.POST and 'Page_Name' not in request.POST and 'save' not in request.POST and 'push' not in request.POST:
                 if 'make_changes' in request.POST:
                     # Repo_Path = request.POST['Repo_Path']
                     # Branch_Name = request.POST['Branch_Name']
                     # Repo_Name = "All_Repo/" + Repo_Path[Repo_Path.rfind('/')+1:].split('.')[0]
-                    Repo_Path = f"{code_link[:code_link.find('//')+2]}{username}:{token}@{code_link[code_link.find('//')+2:]}"
-                    Branch_Name = branch
-                    Repo_Name = "All_Repo/" + Repo_Path[Repo_Path.rfind('/')+1:].split('.')[0]
+                    
                     
                     # Auto pull remote repository and change branch
                     if not(os.path.exists("All_Repo")):
@@ -166,14 +169,14 @@ def change_request(request):
                         repo.git.reset("--hard")
                         
                     repo.git.checkout(Branch_Name)
-                    # repo.git.pull()
+                    repo.git.pull()
                     
                     # Pull all the HTML files available in the repository
-                    Html_List = []
-                    for root, dirnames, filenames in os.walk(Repo_Name):
-                        for filename in filenames:
-                            if filename.endswith('.html'):
-                                Html_List.append(os.path.join(root, filename))
+                    # Html_List = []
+                    # for root, dirnames, filenames in os.walk(Repo_Name):
+                    #     for filename in filenames:
+                    #         if filename.endswith('.html'):
+                    #             Html_List.append(os.path.join(root, filename))
                     
                     # TemplateResponse(request, "accounts/change_request.html", {'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn})
                 
@@ -204,11 +207,6 @@ def change_request(request):
                                 color = ""
                             temp = [tag, soup_string, text ,size, color]
                             Response_Table.append(temp)
-                        temp = []
-                        for x in Response_Table:
-                            if x not in temp:
-                                temp.append(x)
-                        Response_Table = temp
                         Response_Table_Length = len(Response_Table)
                     # TemplateResponse(request, "accounts/change_request.html", {'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn})
                     
@@ -218,18 +216,17 @@ def change_request(request):
                     save_btn = "save"
                     with open(Path_To_Search) as fp:
                         original_soup = BeautifulSoup(fp, 'html.parser')
-                    Where_To_Change = request.POST['Where_To_Change'].replace('\r', '')
-                    Old_font = str(Where_To_Change)
+                    Where_To_Change = request.POST['Where_To_Change']
                     Text_To_Replace = request.POST['Text_To_Replace']
                     Replace_Text_With = request.POST['Replace_Text_With']
                     Where_To_Change = BeautifulSoup(Where_To_Change, 'html.parser')
-                    Duplicate_Where_To_Change = Where_To_Change
                     tag = str(Where_To_Change).split("<")[1].split(">")[0]
+                    Old_font = str(Where_To_Change)
                     if " " in tag: tag = tag.split(" ")[0]
                     if "Replace_Font_With" in request.POST and request.POST['Replace_Font_With'] != "":
                         try:
                             if(Where_To_Change.find(tag)['style']):
-                                Change_Text = str(Where_To_Change.find(tag)['style']).replace('\r', '')
+                                Change_Text = str(Where_To_Change.find(tag)['style'])
                                 if "font-size" in Change_Text:
                                     temp1 = str(Change_Text.split("font-size:")[1].split("px;")[0])
                                     temp2 = str(request.POST['Replace_Font_With'])
@@ -265,36 +262,23 @@ def change_request(request):
                     New_font = str(Where_To_Change)
                     soup = str(soup)
                     if(Old_font in soup): soup = soup.replace(Old_font, New_font)
-                    original_soup = str(original_soup)
+                    original_soup = str(soup)
                     if(Old_font in original_soup): original_soup = original_soup.replace(Old_font, New_font)
                     soup = BeautifulSoup(soup, "html.parser")
                     original_soup = BeautifulSoup(original_soup, "html.parser")
                     
-                    if Text_To_Replace != '' and Replace_Text_With != '':
-                        Soup_Changer = Where_To_Change.string.replace(Text_To_Replace, Replace_Text_With)
-                        
-                        # display soup text change
-                        for x in soup.find_all(tag, text = re.compile(str(Where_To_Change.string.strip()))):
-                            if str(x) == str(Duplicate_Where_To_Change):
-                                Changer = x
-                                break
-                        # Changer = soup.find(Where_To_Change)
-                        # Changer = soup.find(text = re.compile(str(Where_To_Change.string.strip())))
-                        print(f"Changer: {Changer}")
-                        Changer.string.replace_with(Soup_Changer)
-                        print(Changer)
-                        # raise Exception("Intended")
-                        # original_soup text change
-                        # Changer2 = original_soup.find_all(tag= '', text = re.compile(str(Where_To_Change.string.strip())))
-                        # Changer2 = original_soup.find('title style="font-size:18px;color:#b80a0a;"' ,text = re.compile(str(Where_To_Change.string.strip())))
-                        # Changer2.replace_with(Soup_Changer)
-                        # Changer2 = original_soup.find(tag=Where_To_Change.parent, text = str(Where_To_Change.string))
-                        for x in original_soup.find_all(tag, text = re.compile(str(Where_To_Change.string.strip()))):
-                            if str(x) == str(Duplicate_Where_To_Change).replace('\r', ''):
-                                Changer2 = x
-                                break
-                        Changer2.string.replace_with(Soup_Changer)
-                        # print(Changer)
+                    Soup_Changer = Where_To_Change.string.replace(Text_To_Replace, Replace_Text_With)
+                    
+                    # display soup text change
+                    Changer = soup.find(tag=Where_To_Change.parent, text = str(Where_To_Change.string))
+                    print(Changer)
+                    Changer.string.replace_with(Soup_Changer)
+                    print(Changer)
+                    
+                    # original_soup text change
+                    Changer2 = original_soup.find(tag=Where_To_Change.parent, text = str(Where_To_Change.string))
+                    Changer2.string.replace_with(Soup_Changer)
+                    print(Changer)
                     
                     msg = "Success. Please save the changes"
                     
@@ -315,11 +299,6 @@ def change_request(request):
                             color = ""
                         temp = [tag, soup_string, text ,size, color]
                         Response_Table.append(temp)
-                    temp = []
-                    for x in Response_Table:
-                        if x not in temp:
-                            temp.append(x)
-                    Response_Table = temp
                     Response_Table_Length = len(Response_Table)
                     # TemplateResponse(request, "accounts/change_request.html", {'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn})
                     
@@ -329,8 +308,9 @@ def change_request(request):
                     save_btn = request.POST['save']
                     if save_btn == "save":
                         with open(Path_To_Search, "w") as fp:
-                            original_soup = original_soup.prettify()
-                            fp.write(original_soup)
+                            # soup = soup.prettify()
+                            # fp.write(original_soup.prettify())
+                            fp.write(str(original_soup))
                         # repo.git.add(update=True)
                         # repo.index.commit(Commit_Message)
                         msg = "Success. Please push the changes"
@@ -362,11 +342,6 @@ def change_request(request):
                             color = ""
                         temp = [tag, soup_string, text ,size, color]
                         Response_Table.append(temp)
-                    temp = []
-                    for x in Response_Table:
-                        if x not in temp:
-                            temp.append(x)
-                    Response_Table = temp
                     Response_Table_Length = len(Response_Table)
                     # TemplateResponse(request, "accounts/change_request.html", {'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn})
                     
@@ -381,15 +356,29 @@ def change_request(request):
                     #     msg = "Changes have been pushed successfully"
                     # except:
                     #     msg = "Error! Please try again later"
-                    msg = "Changes have been pushed successfully"
+                    try:
+                        # change_request = ChangeRequest(client_request=client_request, repo=Repo_Name)
+                        # change_request.save()
+                        msg = "Changes have been pushed successfully"
+                    
+                    except Exception as e:
+                        print(f'Error while saving to change request: {e}')
+                        msg = "Failed to push change! Try Again."
                     # TemplateResponse(request, "accounts/change_request.html", {'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn})
                     
+
+                if (os.path.exists("All_Repo")):
+                    Html_List = []
+                    for root, dirnames, filenames in os.walk(Repo_Name):
+                        for filename in filenames:
+                            if filename.endswith('.html'):
+                                Html_List.append(os.path.join(root, filename))
                 else:
                     Html_List = []
                     Response_Table = []
                     Response_Table_Length = len(Response_Table)
                 
-                # print(f'Response Table: {Response_Table}')
+                print(f'Response Table: {Response_Table}') 
                 return TemplateResponse(request, "accounts/change_request.html", {'user':profile, 'repo':code_link, 'branch':branch, 'Html_List':Html_List, 'Table':Response_Table, 'Table_Length':Response_Table_Length, 'msg':msg, 'save_btn':save_btn, 'client_req_urls':request.POST['client_req_urls']})
             
         except Exception as e:
