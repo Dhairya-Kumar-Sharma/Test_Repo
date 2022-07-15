@@ -1,4 +1,4 @@
 .env
-venv
+/venv
 .vscode
-All_Repo
+/All_Repo
