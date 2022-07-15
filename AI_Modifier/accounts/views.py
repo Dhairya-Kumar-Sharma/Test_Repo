@@ -165,7 +165,7 @@ def change_request(request):
                         repo.git.reset("--hard")
                         
                     repo.git.checkout(Branch_Name)
-                    # repo.git.pull()
+                    repo.git.pull()
                     
                     # Pull all the HTML files available in the repository
                     Html_List = []
